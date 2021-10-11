@@ -45,9 +45,20 @@ $tenantId = 'TENANTID-HERE'
 $appId = 'AZUREADAPPID-HERE'
 $appSecret = 'AZUREADAPPSECRET-HERE'
 ```
+![Alt text](https://github.com/niklasrast/Azure-Graph-Reporting/blob/main/img/azure-ad-app-registration-01.png "App registration details")
 
-## Azure AD App permissions:
-![Alt text](https://github.com/niklasrast/Azure-Graph-Reporting/blob/main/azure-ad-app-permissions.png "App permissions details")
+### Azure AD App permissions:
+Create an Azure AD App registration and assign following rights:
+![Alt text](https://github.com/niklasrast/Azure-Graph-Reporting/blob/main/img/azure-ad-app-permissions.png "App permissions details")
+
+## Schedule task
+Create a Basic schedule task with following configuration:
+![Alt text](https://github.com/niklasrast/Azure-Graph-Reporting/blob/main/img/schedule-taks-01.png "Schedule task configuration")
+![Alt text](https://github.com/niklasrast/Azure-Graph-Reporting/blob/main/img/schedule-taks-02.png "Schedule task configuration")
+![Alt text](https://github.com/niklasrast/Azure-Graph-Reporting/blob/main/img/schedule-taks-03.png "Schedule task configuration")
+![Alt text](https://github.com/niklasrast/Azure-Graph-Reporting/blob/main/img/schedule-taks-04.png "Schedule task configuration")
+![Alt text](https://github.com/niklasrast/Azure-Graph-Reporting/blob/main/img/schedule-taks-05.png "Schedule task configuration")
+
 
 ## Requirements:
 - PowerShell 5.0
