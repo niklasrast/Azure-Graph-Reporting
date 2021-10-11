@@ -86,7 +86,7 @@ function SendTeamsNotification {
     }
     
     $TeamMessageBody = ConvertTo-Json $JSONBody -Depth 100
-    Invoke-RestMethod -Uri $TeamsURL -Method Post -Body $TeamMessageBody -ContentType 'application/json'
+    Invoke-RestMethod -Uri $TeamsURL -Method Post -Body $TeamMessageBody -ContentType 'application/json' | Out-Null
     Write-Host "Function SendTeamsNotification finished." -ForegroundColor Green
 }
 
