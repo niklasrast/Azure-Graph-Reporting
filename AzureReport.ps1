@@ -19,8 +19,7 @@ $AzureSMTPUser = ""
 $AzureSMTPPassword = ConvertTo-SecureString "" -AsPlainText -Force 
 $AzureCreds = New-Object System.Management.Automation.PSCredential -ArgumentList ($AzureSMTPUser, $AzureSMTPPassword)
 $ReportRecipient = ''
-$ReportGenerators  = ''
-$TeamsURL = ""
+$ReportGenerators  = '', ' oder ', ''
 $IgelServer = ""
 $IgelUser = ""
 $IgelPassword = (ConvertTo-SecureString "" -AsPlainText -Force) 
@@ -51,18 +50,6 @@ $response = Invoke-RestMethod -Method Post -Uri $oAuthUri -Body $body -ErrorActi
 $aadToken = $response.access_token
 
 #Modules
-if ($IgelServer -ne "") {
-    if (Get-Module -ListAvailable -Name PSIGEL) {
-        Import-Module -Name PSIGEL
-        Write-Host "Imported PSIGEL Module" -ForegroundColor Green
-
-    } 
-    else {
-        Install-Module -Name PSIGEL
-        Import-Module -Name PSIGEL
-        Write-Host "Installed and Imported PSIGEL Module" -ForegroundColor Green
-    }
-}
 if (Get-Module -ListAvailable -Name ImportExcel) {
     Import-Module -Name ImportExcel
     Write-Host "Imported ImportExcel Module" -ForegroundColor Green
@@ -71,23 +58,6 @@ else {
     Install-Module -Name ImportExcel
     Import-Module -Name ImportExcel
     Write-Host "Installed and Imported ImportExcel Module" -ForegroundColor Green
-}
-
-
-function SendTeamsNotification {
-    #Teams Notification
-    $JSONBody = [PSCustomObject][Ordered]@{
-        "@type"      = "MessageCard"
-        "@context"   = "http://schema.org/extensions"
-        "summary"    = "Modern Workplace Reporting Service"
-        "themeColor" = '1683E0'
-        "title"      = "Modern Workplace Reporting Service"
-        "text"       = "Der monatliche Report ($Month) für den Kunden $Customer wurde erstellt und an die SDM versendet."
-    }
-    
-    $TeamMessageBody = ConvertTo-Json $JSONBody -Depth 100
-    Invoke-RestMethod -Uri $TeamsURL -Method Post -Body $TeamMessageBody -ContentType 'application/json' | Out-Null
-    Write-Host "Function SendTeamsNotification finished." -ForegroundColor Green
 }
 
 function DefenderAlerts {
@@ -108,7 +78,6 @@ function DefenderAlerts {
     $DefenderAlerts = ($response | ConvertFrom-Json).value | ConvertTo-Json
 
     ($DefenderAlerts | ConvertFrom-Json) | Select-Object category, eventDateTime, description, severity | Where-Object eventDateTime -match $Month | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append 
-    "--- NO MORE ENTRIES FOR $Month --- " | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
     Write-Host "Function DefenderAlerts finished." -ForegroundColor Green
 }
 
@@ -154,18 +123,25 @@ function AzureADDevices {
     Write-Host "Function AzureADDevices finished." -ForegroundColor Green
 }
 
-function IgelClientReport {
+function AutopilotEvents {
 
-    if ($IgelServer -ne "") {
-        $SheetName = "IGEL Clients"
-        [pscredential]$IgelCreds = New-Object System.Management.Automation.PSCredential ($IgelUser, $IgelPassword)
-        $WebSession = New-UMSAPICookie -Computername $IgelServer -Credential $IgelCreds
-        Get-UMSDevice -Computername $IgelServer -WebSession $WebSession | Select-Object Name, Mac, LastIp | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
-        Remove-UMSAPICookie -Computername $IgelServer -WebSession $WebSession  
-    } else {
-        Write-Host "No IGEL UMS Server detected for $Customer - Skipped function"
+    $SheetName = "Windows Autopilot (FOR WPS)" 
+    $url = "https://graph.microsoft.com/beta/deviceManagement/autopilotEvents"
+
+    # Set the WebRequest headers
+    $headers = @{
+        'Content-Type' = 'application/json'
+        Accept = 'application/json'
+        Authorization = "Bearer $aadToken"
     }
-    Write-Host "Function IgelClientReport finished." -ForegroundColor Green
+
+    # Send the webrequest and get the results. 
+    $response = Invoke-WebRequest -Method Get -Uri $url -Headers $headers -ErrorAction Stop
+    #Extract the alerts from the results. 
+    $AutopilotEvents = ($response | ConvertFrom-Json).value | ConvertTo-Json
+
+    ($AutopilotEvents | ConvertFrom-Json) | Select-Object deviceSerialNumber, managedDeviceName, osVersion, windowsAutopilotDeploymentProfileDisplayName, enrollmentType, enrollmentState, deploymentStartDateTime, deploymentEndDateTime | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
+    Write-Host "Function AutopilotEvents finished." -ForegroundColor Green
 }
 
 function AzureADUsers {
@@ -227,7 +203,7 @@ function IntuneApplicationList {
     #Extract the SW List from the results. 
     $MEMApplications = ($response | ConvertFrom-Json).value | ConvertTo-Json
 
-    ($MEMApplications | ConvertFrom-Json) | Select-Object displayName, createdDateTime, developer, owner, notes | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
+    ($MEMApplications | ConvertFrom-Json) | Select-Object displayName, createdDateTime, developer, owner, notes, publisher | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
     Write-Host "Function IntuneApplicationList finished." -ForegroundColor Green
 }
 
@@ -248,9 +224,29 @@ function IntuneCreatedPackages {
     #Extract the SW List from the results. 
     $MEMCreatedPackages = ($response | ConvertFrom-Json).value | ConvertTo-Json
 
-    ($MEMCreatedPackages | ConvertFrom-Json) | Select-Object displayName, createdDateTime, developer, owner, notes | Where-Object createdDateTime -match $Month | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
-    "--- NO MORE ENTRIES FOR $Month --- " | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
+    ($MEMCreatedPackages | ConvertFrom-Json) | Select-Object displayName, createdDateTime, developer, owner, notes, publisher | Where-Object createdDateTime -match $Month | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
     Write-Host "Function IntuneCreatedPackages finished." -ForegroundColor Green
+}
+
+function WindowsUpdateForBusinessDeployments {
+
+    $SheetName = "Windows Updates (FOR WPS)" 
+    $url = "https://graph.microsoft.com/beta/admin/windows/updates/catalog/entries"
+
+    # Set the WebRequest headers
+    $headers = @{
+        'Content-Type' = 'application/json'
+        Accept = 'application/json'
+        Authorization = "Bearer $aadToken"
+    }
+
+    # Send the webrequest and get the results. 
+    $response = Invoke-WebRequest -Method Get -Uri $url -Headers $headers -ErrorAction Stop
+    #Extract the SW List from the results. 
+    $MEMCreatedUpdates = ($response | ConvertFrom-Json).value | ConvertTo-Json
+
+    ($MEMCreatedUpdates | ConvertFrom-Json) | Select-Object displayName, qualityUpdateClassification, releaseDateTime | Where-Object releaseDateTime -match $Month | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
+    Write-Host "Function WindowsUpdateForBusinessDeployments finished." -ForegroundColor Green
 }
  
 function SendReportMail {
@@ -286,10 +282,10 @@ if ($true -eq (Test-Path ($OutFile))){
 DefenderAlerts
 AzurePrinter
 AzureADDevices
-IgelClientReport
 AzureADUsers
 AzureADGroups
 IntuneApplicationList
 IntuneCreatedPackages
+AutopilotEvents
+WindowsUpdateForBusinessDeployments
 SendReportMail
-SendTeamsNotification
