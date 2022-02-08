@@ -20,9 +20,6 @@ $AzureSMTPPassword = ConvertTo-SecureString "" -AsPlainText -Force
 $AzureCreds = New-Object System.Management.Automation.PSCredential -ArgumentList ($AzureSMTPUser, $AzureSMTPPassword)
 $ReportRecipient = ''
 $ReportGenerators  = '', ' oder ', ''
-$IgelServer = ""
-$IgelUser = ""
-$IgelPassword = (ConvertTo-SecureString "" -AsPlainText -Force) 
 
 #Variable for last month
 $LastMonth = (Get-Date -Format "MM").ToString() -1
