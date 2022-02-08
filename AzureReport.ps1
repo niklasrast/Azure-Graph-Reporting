@@ -122,7 +122,7 @@ function AzureADDevices {
 
 function AutopilotEvents {
 
-    $SheetName = "Windows Autopilot (FOR WPS)" 
+    $SheetName = "Windows Autopilot" 
     $url = "https://graph.microsoft.com/beta/deviceManagement/autopilotEvents"
 
     # Set the WebRequest headers
@@ -185,7 +185,7 @@ function AzureADGroups {
 
 function IntuneApplicationList {
 
-    $SheetName = "$Customer Software Warenkorb" 
+    $SheetName = "Software inventory" 
     $url = "https://graph.microsoft.com/v1.0/deviceAppManagement/mobileApps"
 
     # Set the WebRequest headers
@@ -206,7 +206,7 @@ function IntuneApplicationList {
 
 function IntuneCreatedPackages {
 
-    $SheetName = "Software Paketierungen" 
+    $SheetName = "Software requests" 
     $url = "https://graph.microsoft.com/v1.0/deviceAppManagement/mobileApps"
 
     # Set the WebRequest headers
@@ -227,7 +227,7 @@ function IntuneCreatedPackages {
 
 function WindowsUpdateForBusinessDeployments {
 
-    $SheetName = "Windows Updates (FOR WPS)" 
+    $SheetName = "Windows Updates" 
     $url = "https://graph.microsoft.com/beta/admin/windows/updates/catalog/entries"
 
     # Set the WebRequest headers
