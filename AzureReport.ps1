@@ -122,7 +122,7 @@ function AzureADDevices {
 
 function AutopilotEvents {
 
-    $SheetName = "Windows Autopilot" 
+    $SheetName = "Windows Autopilot (FOR WPS)" 
     $url = "https://graph.microsoft.com/beta/deviceManagement/autopilotEvents"
 
     # Set the WebRequest headers
@@ -185,7 +185,7 @@ function AzureADGroups {
 
 function IntuneApplicationList {
 
-    $SheetName = "Software inventory" 
+    $SheetName = "Software Warenkorb" 
     $url = "https://graph.microsoft.com/v1.0/deviceAppManagement/mobileApps"
 
     # Set the WebRequest headers
@@ -206,7 +206,7 @@ function IntuneApplicationList {
 
 function IntuneCreatedPackages {
 
-    $SheetName = "Software requests" 
+    $SheetName = "Software Paketierungen" 
     $url = "https://graph.microsoft.com/v1.0/deviceAppManagement/mobileApps"
 
     # Set the WebRequest headers
@@ -227,7 +227,7 @@ function IntuneCreatedPackages {
 
 function WindowsUpdateForBusinessDeployments {
 
-    $SheetName = "Windows Updates" 
+    $SheetName = "Windows Updates (FOR WPS)" 
     $url = "https://graph.microsoft.com/beta/admin/windows/updates/catalog/entries"
 
     # Set the WebRequest headers
@@ -244,6 +244,25 @@ function WindowsUpdateForBusinessDeployments {
 
     ($MEMCreatedUpdates | ConvertFrom-Json) | Select-Object displayName, qualityUpdateClassification, releaseDateTime | Where-Object releaseDateTime -match $Month | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
     Write-Host "Function WindowsUpdateForBusinessDeployments finished." -ForegroundColor Green
+}
+
+function IntuneAuditLogs {
+    $SheetName = "Intune AuditLogs (FOR WPS)" 
+    $url = "https://graph.microsoft.com/beta/deviceManagement/auditEvents"
+
+    # Set the WebRequest headers
+    $headers = @{
+        'Content-Type' = 'application/json'
+        Accept = 'application/json'
+        Authorization = "Bearer $aadToken"
+    }
+
+    # Send the webrequest and get the results. 
+    $response = Invoke-WebRequest -Method Get -Uri $url -Headers $headers -ErrorAction Stop
+    #Extract the AuditLogs from the results. 
+    $MEMAuditLogs = ($response | ConvertFrom-Json).value | ConvertTo-Json -Depth 3
+    ($MEMAuditLogs | ConvertFrom-Json) | Select-Object displayName, activityDateTime, resources -ExpandProperty actor | Select-Object displayName, userPrincipalName, activityDateTime | Where-Object activityDateTime -match $Month | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append  
+    Write-Host "Function IntuneAuditLogs finished." -ForegroundColor Green
 }
  
 function SendReportMail {
@@ -279,10 +298,12 @@ if ($true -eq (Test-Path ($OutFile))){
 DefenderAlerts
 AzurePrinter
 AzureADDevices
-AzureADUsers
-AzureADGroups
+IgelClientReport
+#AzureADUsers
+#AzureADGroups
 IntuneApplicationList
 IntuneCreatedPackages
 AutopilotEvents
 WindowsUpdateForBusinessDeployments
-SendReportMail
+IntuneAuditLogs
+#SendReportMail
