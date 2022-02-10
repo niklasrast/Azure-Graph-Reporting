@@ -19,7 +19,7 @@ $AzureSMTPUser = ""
 $AzureSMTPPassword = ConvertTo-SecureString "" -AsPlainText -Force 
 $AzureCreds = New-Object System.Management.Automation.PSCredential -ArgumentList ($AzureSMTPUser, $AzureSMTPPassword)
 $ReportRecipient = ''
-$ReportGenerators  = '', ' oder ', ''
+$ReportGenerators  = '', ' or ', '' 
 
 #Variable for last month
 $LastMonth = (Get-Date -Format "MM").ToString() -1
@@ -74,7 +74,15 @@ function DefenderAlerts {
     #Extract the alerts from the results. 
     $DefenderAlerts = ($response | ConvertFrom-Json).value | ConvertTo-Json
 
-    ($DefenderAlerts | ConvertFrom-Json) | Select-Object category, eventDateTime, description, severity | Where-Object eventDateTime -match $Month | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append 
+    foreach ($item in ($DefenderAlerts | ConvertFrom-Json) ) {
+        $DefenderAlert = [PSCustomObject]@{
+            EventTime = $item.eventDateTime
+            Category = $item.category
+            Severity = $item.severity
+            Description = $item.description
+        }
+    $DefenderAlert | Where-Object EventTime -match $Month  | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
+    }
     Write-Host "Function DefenderAlerts finished." -ForegroundColor Green
 }
 
@@ -95,7 +103,14 @@ function AzurePrinter {
     #Extract the alerts from the results. 
     $AUPDevices = ($response | ConvertFrom-Json).value | ConvertTo-Json
 
-    ($AUPDevices | ConvertFrom-Json) | Select-Object name, model, isShared | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append 
+    foreach ($item in ($AUPDevices | ConvertFrom-Json) ) {
+        $AUPDevice = [PSCustomObject]@{
+            Printername = $item.name
+            Model = $item.model
+            Active = $item.isShared
+        }
+    $AUPDevice | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
+    }
     Write-Host "Function AzurePrinter finished." -ForegroundColor Green
 }
 
@@ -116,7 +131,19 @@ function AzureADDevices {
     #Extract the alerts from the results. 
     $AADDevices = ($response | ConvertFrom-Json).value | ConvertTo-Json
 
-    ($AADDevices | ConvertFrom-Json) | Select-Object serialNumber, deviceName, operatingSystem, osVersion, manufacturer, model, emailAddress, lastSyncDateTime | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
+    foreach ($item in ($AADDevices | ConvertFrom-Json) ) {
+        $AADDevice = [PSCustomObject]@{
+            SerialNumber = $item.serialNumber
+            DeviceName = $item.deviceName
+            OperatingSystem = $item.operatingSystem
+            Version = $item.osVersion
+            Manufacturer = $item.manufacturer
+            Model = $item.model
+            PrimaryUser = $item.emailAddress
+            LastIntuneSync = $item.lastSyncDateTime
+        }
+    $AADDevice | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
+    }
     Write-Host "Function AzureADDevices finished." -ForegroundColor Green
 }
 
@@ -137,7 +164,19 @@ function AutopilotEvents {
     #Extract the alerts from the results. 
     $AutopilotEvents = ($response | ConvertFrom-Json).value | ConvertTo-Json
 
-    ($AutopilotEvents | ConvertFrom-Json) | Select-Object deviceSerialNumber, managedDeviceName, osVersion, windowsAutopilotDeploymentProfileDisplayName, enrollmentType, enrollmentState, deploymentStartDateTime, deploymentEndDateTime | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
+    foreach ($item in ($AutopilotEvents | ConvertFrom-Json) ) {
+        $AutopilotEvent = [PSCustomObject]@{
+            SerialNumber = $item.deviceSerialNumber
+            DeviceName = $item.managedDeviceName
+            Version = $item.osVersion
+            DeploymentProfile = $item.windowsAutopilotDeploymentProfileDisplayName
+            EnrollmentType = $item.enrollmentType
+            EnrollmentState = $item.enrollmentState
+            DeploymentStart = $item.deploymentStartDateTime
+            DeploymentEnd = $item.deploymentEndDateTime
+        }
+    $AutopilotEvent | Where-Object DeploymentStart -match $Month | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
+    }
     Write-Host "Function AutopilotEvents finished." -ForegroundColor Green
 }
 
@@ -158,7 +197,14 @@ function AzureADUsers {
     #Extract the alerts from the results. 
     $AADUsers = ($response | ConvertFrom-Json).value | ConvertTo-Json
 
-    ($AADUsers | ConvertFrom-Json) | Select-Object givenName, surname, userPrincipalName | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
+    foreach ($item in ($AADUsers | ConvertFrom-Json) ) {
+        $AADUser = [PSCustomObject]@{
+            Name = $item.givenName
+            Surname = $item.surname
+            Mail = $item.userPrincipalName
+        }
+    $AADUser | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
+    }
     Write-Host "Function AzureADUsers finished." -ForegroundColor Green
 }
 
@@ -179,7 +225,14 @@ function AzureADGroups {
     #Extract the alerts from the results. 
     $AADGroups = ($response | ConvertFrom-Json).value | ConvertTo-Json
 
-    ($AADGroups | ConvertFrom-Json) | Select-Object displayName, createdDateTime, isAssignableToRole, membershipRule | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
+    foreach ($item in ($AADGroups | ConvertFrom-Json) ) {
+        $AADGroup = [PSCustomObject]@{
+            CreatedDate = $item.createdDateTime
+            GroupName = $item.displayName
+            MembershipRule = $item.membershipRule
+        }
+    $AADGroup | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
+    }
     Write-Host "Function AzureADGroups finished." -ForegroundColor Green
 }
 
@@ -200,7 +253,17 @@ function IntuneApplicationList {
     #Extract the SW List from the results. 
     $MEMApplications = ($response | ConvertFrom-Json).value | ConvertTo-Json
 
-    ($MEMApplications | ConvertFrom-Json) | Select-Object displayName, createdDateTime, developer, owner, notes, publisher | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
+    foreach ($item in ($MEMApplications | ConvertFrom-Json) ) {
+        $MEMApplication = [PSCustomObject]@{
+            PackageDate = $item.createdDateTime
+            PackageName = $item.displayName
+            Packager = $item.developer
+            Order = $item.owner
+            Class = $item.notes
+            Owner = $item.publisher
+        }
+    $MEMApplication | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
+    }
     Write-Host "Function IntuneApplicationList finished." -ForegroundColor Green
 }
 
@@ -221,7 +284,17 @@ function IntuneCreatedPackages {
     #Extract the SW List from the results. 
     $MEMCreatedPackages = ($response | ConvertFrom-Json).value | ConvertTo-Json
 
-    ($MEMCreatedPackages | ConvertFrom-Json) | Select-Object displayName, createdDateTime, developer, owner, notes, publisher | Where-Object createdDateTime -match $Month | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
+    foreach ($item in ($MEMCreatedPackages | ConvertFrom-Json) ) {
+        $MEMPackage = [PSCustomObject]@{
+            PackageDate = $item.createdDateTime
+            PackageName = $item.displayName
+            Packager = $item.developer
+            Order = $item.owner
+            Class = $item.notes
+            Owner = $item.publisher
+        }
+    $MEMPackage | Where-Object PackageDate -match $Month | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
+    }
     Write-Host "Function IntuneCreatedPackages finished." -ForegroundColor Green
 }
 
@@ -242,7 +315,14 @@ function WindowsUpdateForBusinessDeployments {
     #Extract the SW List from the results. 
     $MEMCreatedUpdates = ($response | ConvertFrom-Json).value | ConvertTo-Json
 
-    ($MEMCreatedUpdates | ConvertFrom-Json) | Select-Object displayName, qualityUpdateClassification, releaseDateTime | Where-Object releaseDateTime -match $Month | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append
+    foreach ($item in ($MEMCreatedUpdates | ConvertFrom-Json) ) {
+        $MEMUpdate = [PSCustomObject]@{
+            Release = $item.releaseDate
+            Update = $item.displayName
+            Class = $item.qualityUpdateClassification
+        }
+    $MEMUpdate | Where-Object Release -match $Month | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
+    }
     Write-Host "Function WindowsUpdateForBusinessDeployments finished." -ForegroundColor Green
 }
 
@@ -260,8 +340,21 @@ function IntuneAuditLogs {
     # Send the webrequest and get the results. 
     $response = Invoke-WebRequest -Method Get -Uri $url -Headers $headers -ErrorAction Stop
     #Extract the AuditLogs from the results. 
-    $MEMAuditLogs = ($response | ConvertFrom-Json).value | ConvertTo-Json -Depth 3
-    ($MEMAuditLogs | ConvertFrom-Json) | Select-Object displayName, activityDateTime, resources -ExpandProperty actor | Select-Object displayName, userPrincipalName, activityDateTime | Where-Object activityDateTime -match $Month | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append  
+    $MEMAuditLogs = ($response | ConvertFrom-Json).value | ConvertTo-Json
+    
+    foreach ($item in ($MEMAuditLogs | ConvertFrom-Json) ) {
+        $i = 0
+        $AuditEvent = [PSCustomObject]@{
+            EventTime = $item.activityDateTime
+            EventType = $item.activityType
+            Category = $item.category
+            Actor = $item.actor.userPrincipalName
+            Resource = $item.resources[$i].displayName
+            ResourceType = $item.resources[$i].Type
+        }
+        $i = $i + 1
+    $AuditEvent | Where-Object EventTime -match $Month | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
+    }
     Write-Host "Function IntuneAuditLogs finished." -ForegroundColor Green
 }
  
@@ -289,6 +382,58 @@ function SendReportMail {
     Write-Host "Function SendReportMail finished." -ForegroundColor Green
 }
 
+function SendReportMailGraph {
+    $url = "https://graph.microsoft.com/v1.0/users/$AzureSMTPUser/sendMail"
+
+    $FileName=(Get-Item -Path $OutFile).name
+    $base64string = [Convert]::ToBase64String([IO.File]::ReadAllBytes($OutFile))
+
+    # Set the WebRequest headers
+    $headers = @{
+        'Content-Type' = 'application/json'
+        Accept = 'application/json'
+        Authorization = "Bearer $aadToken"
+    }
+
+    $BodyJsonsend = @"
+                    {
+                        "message": {
+                          "subject": "Modern Workplace Reporting $Customer",
+                          "body": {
+                            "contentType": "HTML",
+                            "content": "Hallo, <br>
+                            anbei der Report der Workplace Services des Kunden $Customer im Monat $Month. <br>
+                            Bitte bei Fragen an $ReportGenerators wenden."
+                            <br><br>
+                            Viele Gruese <br>
+                            Workplace Administration <br>
+                            "
+                          },
+                          
+                          "toRecipients": [
+                            {
+                              "emailAddress": {
+                                "address": "$ReportRecipient"
+                              }
+                            }
+                          ]
+                          ,"attachments": [
+                            {
+                              "@odata.type": "#microsoft.graph.fileAttachment",
+                              "name": "$FileName",
+                              "contentType": "text/plain",
+                              "contentBytes": "$base64string"
+                            }
+                          ]
+                        },
+                        "saveToSentItems": "true"
+                      }
+"@
+    # Send mail
+    Invoke-RestMethod -Method POST -Uri $url -Headers $headers -Body $BodyJsonsend
+    Write-Host "Function SendReportMailGraph finished." -ForegroundColor Green
+}
+
 #Cleanup if run more than once a month
 if ($true -eq (Test-Path ($OutFile))){
     Remove-Item -Path $OutFile -Force
@@ -298,7 +443,7 @@ if ($true -eq (Test-Path ($OutFile))){
 DefenderAlerts
 AzurePrinter
 AzureADDevices
-IgelClientReport
+#IgelClientReport
 #AzureADUsers
 #AzureADGroups
 IntuneApplicationList
@@ -306,4 +451,5 @@ IntuneCreatedPackages
 AutopilotEvents
 WindowsUpdateForBusinessDeployments
 IntuneAuditLogs
-#SendReportMail
+SendReportMail
+#SendReportMailGraph
