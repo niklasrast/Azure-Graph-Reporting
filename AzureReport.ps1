@@ -443,7 +443,6 @@ if ($true -eq (Test-Path ($OutFile))){
 DefenderAlerts
 AzurePrinter
 AzureADDevices
-#IgelClientReport
 #AzureADUsers
 #AzureADGroups
 IntuneApplicationList
