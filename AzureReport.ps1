@@ -317,7 +317,7 @@ function WindowsUpdateForBusinessDeployments {
 
     foreach ($item in ($MEMCreatedUpdates | ConvertFrom-Json) ) {
         $MEMUpdate = [PSCustomObject]@{
-            Release = $item.releaseDate
+            Release = $item.releaseDateTime
             Update = $item.displayName
             Class = $item.qualityUpdateClassification
         }
