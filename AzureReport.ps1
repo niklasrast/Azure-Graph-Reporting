@@ -340,7 +340,7 @@ function IntuneAuditLogs {
     # Send the webrequest and get the results. 
     $response = Invoke-WebRequest -Method Get -Uri $url -Headers $headers -ErrorAction Stop
     #Extract the AuditLogs from the results. 
-    $MEMAuditLogs = ($response | ConvertFrom-Json).value | ConvertTo-Json
+    $MEMAuditLogs = ($response | ConvertFrom-Json).value | ConvertTo-Json -Depth 3
     
     foreach ($item in ($MEMAuditLogs | ConvertFrom-Json) ) {
         $i = 0
@@ -443,8 +443,8 @@ if ($true -eq (Test-Path ($OutFile))){
 DefenderAlerts
 AzurePrinter
 AzureADDevices
-#AzureADUsers
-#AzureADGroups
+AzureADUsers
+AzureADGroups
 IntuneApplicationList
 IntuneCreatedPackages
 AutopilotEvents
