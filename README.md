@@ -11,7 +11,7 @@ My recommendation for you is to create an schedule task to auto-run this script 
 
 ## Create report:
 ```powershell
-PowerShell.exe -ExecutionPolicy Bypass -Command .\AzureReport.ps1
+PowerShell.exe -ExecutionPolicy Bypass -Command .\AzureReportWPS.ps1
 ```
 
 ## Report Customer settings:
@@ -19,27 +19,19 @@ PowerShell.exe -ExecutionPolicy Bypass -Command .\AzureReport.ps1
 $Customer = "CUSTOMERNAME-HERE"
 ```
 
-## Report SMTP Seder settings:
+## Report MailSend settings:
 ```powershell
-$AzureSMTPUser = "M365SMTPADRESS-HERE"
-$AzureSMTPPassword = ConvertTo-SecureString "M365SMTPPASSWORD-HERE" -AsPlainText -Force
-$ReportRecipient = 'RECIPIENT-HERE'
-$ReportGenerators  = 'REPLYTO-HERE'
-```
+$ReportRecipient = 'someone@mydomain.tld'
 
-## Report Teams settings:
-```powershell
-$TeamsURL = "TEAMSWEBHOOKURL-HERE"
-```
-
-## Report IGEL Clients settings:
-```powershell
-$IgelServer = "SERVERFQDN-HERE"
-$IgelUser = "UMSADMIN-HERE"
-$IgelPassword = (ConvertTo-SecureString "UMSADMINPASSWORD-HERE" -AsPlainText -Force) 
+function SendReportMailGraph {
+    $MailTenantID = 'YOURTENANTID'
+    $MailClientID = 'YOURAPPID'
+    $MailClientsecret = 'YOURAPPSECRET'
+    $MailSender = "someone@mydomain.tld"
 ```
 
 ## Report App registration settings:
+Place the Azure AD App registration from the tenant where you want to grab the reporting data from
 ```powershell
 $tenantId = 'TENANTID-HERE'
 $appId = 'AZUREADAPPID-HERE'
