@@ -232,6 +232,34 @@ function AzureADGroups {
     Write-Host "Function AzureADGroups finished." -ForegroundColor Green
 }
 
+function AzureADLicenses {
+
+    $SheetName = "Azure AD Licenses" 
+    $url = "https://graph.microsoft.com/v1.0/subscribedSkus"
+
+    # Set the WebRequest headers
+    $headers = @{
+        'Content-Type' = 'application/json'
+        Accept = 'application/json'
+        Authorization = "Bearer $aadToken"
+    }
+
+    # Send the webrequest and get the results. 
+    $response = Invoke-WebRequest -Method Get -Uri $url -Headers $headers -ErrorAction Stop
+    #Extract the alerts from the results. 
+    $AADLic = ($response | ConvertFrom-Json).value | ConvertTo-Json
+
+    foreach ($item in ($AADLic | ConvertFrom-Json) ) {
+        $AADLic = [PSCustomObject]@{
+            LicenseName = $item.skuPartNumber
+            Total = $item.prepaidUnits.enabled
+            Assigned = $item.consumedUnits
+        }
+    $AADLic | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
+    }
+    Write-Host "Function AADLicenses finished." -ForegroundColor Green
+}
+
 function IntuneApplicationList {
 
     $SheetName = "Software Warenkorb" 
@@ -436,6 +464,7 @@ if ($true -eq (Test-Path ($OutFile))){
 DefenderAlerts
 AzurePrinter
 AzureADDevices
+AzureADLicenses
 AzureADUsers
 AzureADGroups
 IntuneApplicationList
