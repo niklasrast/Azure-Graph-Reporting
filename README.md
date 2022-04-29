@@ -11,7 +11,7 @@ My recommendation for you is to create an schedule task to auto-run this script 
 
 ## Create report:
 ```powershell
-PowerShell.exe -ExecutionPolicy Bypass -Command .\AzureReportWPS.ps1
+C:\Windows\SysNative\WindowsPowershell\v1.0\PowerShell.exe -ExecutionPolicy Bypass -Command .\AzureReportWPS.ps1
 ```
 
 ## Report Customer settings:
