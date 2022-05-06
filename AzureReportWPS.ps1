@@ -194,16 +194,23 @@ function AzureADUsers {
     $AADUsers = ($response | ConvertFrom-Json).value | ConvertTo-Json
 
     foreach ($item in ($AADUsers | ConvertFrom-Json) ) {
+        $AssignedUserLicenses 
+        foreach ($lic in $item.assignedLicenses) {
+            $i = 0
+            $AssignedUserLicenses = $AssignedUserLicenses + $lic + ", "
+            $i = $i + 1
+        }
+
         $AADUser = [PSCustomObject]@{
             Name = $item.givenName
             Surname = $item.surname
             Mail = $item.userPrincipalName
             OfficeLocation = $item.officeLocation
-            #https://docs.microsoft.com/en-us/azure/active-directory/enterprise-users/licensing-service-plan-reference
-            Licenses = $($item.assignedLicenses -replace '06ebc4ee-1bb5-47dd-8120-11324bc54e06','Microsoft 365 E5').Replace('05e9a617-0261-4cee-bb44-138d3ef5d965','Microsoft 365 E3').Replace('4b585984-651b-448a-9e53-3b10f069cf7f','Office 365 F3').Replace('440eaaa8-b3e0-484b-a8be-62870b9ba70a','Microsoft 365 Phone System Virtual User').Replace('710779e8-3d4a-4c88-adb9-386c958d1fdf','Microsoft Teams Exploratory')
+            Licenses = $($AssignedUserLicenses -replace '06ebc4ee-1bb5-47dd-8120-11324bc54e06','Microsoft 365 E5').Replace('05e9a617-0261-4cee-bb44-138d3ef5d965','Microsoft 365 E3').Replace('4b585984-651b-448a-9e53-3b10f069cf7f','Office 365 F3').Replace('440eaaa8-b3e0-484b-a8be-62870b9ba70a','Microsoft 365 Phone System Virtual User').Replace('710779e8-3d4a-4c88-adb9-386c958d1fdf','Microsoft Teams Exploratory').Replace('a403ebcc-fae0-4ca2-8c8c-7a907fd6c235','Microsoft PowerBi (Free)').Replace('f30db892-07e9-47e9-837c-80727f46fd3d','Microsoft Flow (Free)').Replace('@{disabledPlans=System.Object[]; skuId=','').Replace('}','')
             LastActivity = $item.signInSessionsValidFromDateTime
         }
-    $AADUser | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
+        $AssignedUserLicenses = $null
+    $AADUser | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize 
     }
     Write-Host "Function AzureADUsers finished." -ForegroundColor Green
 }
