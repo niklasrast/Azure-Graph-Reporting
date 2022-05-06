@@ -179,7 +179,7 @@ function AutopilotEvents {
 function AzureADUsers {
 
     $SheetName = "Azure AD Users" 
-    $url = "https://graph.microsoft.com/v1.0/users"
+    $url = "https://graph.microsoft.com/beta/users"
 
     # Set the WebRequest headers
     $headers = @{
@@ -198,6 +198,10 @@ function AzureADUsers {
             Name = $item.givenName
             Surname = $item.surname
             Mail = $item.userPrincipalName
+            OfficeLocation = $item.officeLocation
+            #https://docs.microsoft.com/en-us/azure/active-directory/enterprise-users/licensing-service-plan-reference
+            Licenses = $($item.assignedLicenses -replace '06ebc4ee-1bb5-47dd-8120-11324bc54e06','Microsoft 365 E5').Replace('05e9a617-0261-4cee-bb44-138d3ef5d965','Microsoft 365 E3').Replace('4b585984-651b-448a-9e53-3b10f069cf7f','Office 365 F3').Replace('440eaaa8-b3e0-484b-a8be-62870b9ba70a','Microsoft 365 Phone System Virtual User').Replace('710779e8-3d4a-4c88-adb9-386c958d1fdf','Microsoft Teams Exploratory')
+            LastActivity = $item.signInSessionsValidFromDateTime
         }
     $AADUser | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
     }
@@ -251,7 +255,9 @@ function AzureADLicenses {
 
     foreach ($item in ($AADLic | ConvertFrom-Json) ) {
         $AADLic = [PSCustomObject]@{
-            LicenseName = $item.skuPartNumber
+            #LicenseName = $item.skuPartNumber
+            #https://docs.microsoft.com/en-us/azure/active-directory/enterprise-users/licensing-service-plan-reference
+            LicenseName = $($item.skuPartNumber -replace 'SPE_E5','Microsoft 365 E5').Replace('SPE_E3','Microsoft 365 E3').Replace('DESKLESSPACK','Office 365 F3')
             Total = $item.prepaidUnits.enabled
             Assigned = $item.consumedUnits
         }
