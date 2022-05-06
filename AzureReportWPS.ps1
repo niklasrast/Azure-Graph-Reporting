@@ -263,8 +263,7 @@ function AzureADLicenses {
     foreach ($item in ($AADLic | ConvertFrom-Json) ) {
         $AADLic = [PSCustomObject]@{
             #LicenseName = $item.skuPartNumber
-            #https://docs.microsoft.com/en-us/azure/active-directory/enterprise-users/licensing-service-plan-reference
-            LicenseName = $($item.skuPartNumber -replace 'SPE_E5','Microsoft 365 E5').Replace('SPE_E3','Microsoft 365 E3').Replace('DESKLESSPACK','Office 365 F3')
+            LicenseName = $($item.skuPartNumber -replace 'SPE_E5','Microsoft 365 E5').Replace('SPE_E3','Microsoft 365 E3').Replace('SPE_F1','Microsoft 365 F3').Replace('DESKLESSPACK','Office 365 F3').Replace('VISIOCLIENT','Microsoft Visio (Plan 2)').Replace('VISIOONLINE_PLAN1','Microsoft Visio (Plan 1)').Replace('PROJECTPROFESSIONAL','Microsoft Project (Plan 3)').Replace('FLOW_FREE','Microsoft Flow (Free)').Replace('PHONESYSTEM_VIRTUALUSER','Microsoft 365 Phone System Virtual User').Replace('MCOCAP','COMMON AREA PHONE').Replace('MEETING_ROOM','Microsoft Teams Rooms Standard').Replace('POWER_BI_STANDARD','Microsoft Power BI Standard').Replace('PBI_PREMIUM_PER_USER','Microsoft Power BI Premium').Replace('TEAMS_EXPLORATORY','Microsoft Teams Exploratory').Replace('MCOPSTN2','Microsoft Skype for Business').Replace('RIGHTSMANAGEMENT_ADHOC','Rights Management Adhoc').Replace('POWERAPPS_DEV','Microsoft Power Apps for Developer')
             Total = $item.prepaidUnits.enabled
             Assigned = $item.consumedUnits
         }
