@@ -33,6 +33,22 @@ function SendReportMailGraph {
     $MailSender = "someone@mydomain.tld"
 ```
 
+## Report Feature Enablement:
+Comment or uncomment the folowing lines to enable oder #disable report data
+```powershell
+DefenderAlerts
+AzurePrinter
+AzureADDevices
+AzureADLicenses
+AzureADUsers
+AzureADGroups
+IntuneApplicationList
+IntuneCreatedPackages
+AutopilotEvents
+WindowsUpdateForBusinessDeployments
+IntuneAuditLogs
+```
+
 ## Report App registration settings:
 Place the Azure AD App registration from the tenant where you want to grab the reporting data from
 ```powershell
