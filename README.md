@@ -9,6 +9,9 @@
 This repo contains an powershell scripts to create an Excel report for Azure services from data exported through Microsoft Graph API.
 My recommendation for you is to create an schedule task to auto-run this script every month automatically so that you have zero input for the creation of your reports.
 
+## Report Workflow Picture:
+![Alt text](https://github.com/niklasrast/Azure-Graph-Reporting/blob/main/img/workflow.png "Workflow details")
+
 ## Create report:
 ```powershell
 C:\Windows\SysNative\WindowsPowershell\v1.0\PowerShell.exe -ExecutionPolicy Bypass -Command .\AzureReportWPS.ps1
