@@ -39,6 +39,7 @@ Comment or uncomment the folowing lines to enable oder #disable report data
 DefenderAlerts
 AzurePrinter
 AzureADDevices
+WindowsCloudPC
 AzureADLicenses
 AzureADUsers
 AzureADGroups
