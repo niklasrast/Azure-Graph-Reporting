@@ -143,6 +143,38 @@ function AzureADDevices {
     Write-Host "Function AzureADDevices finished." -ForegroundColor Green
 }
 
+function WindowsCloudPC {
+
+    $SheetName = "Windows 365" 
+    $url = "https://graph.microsoft.com/beta/deviceManagement/virtualEndpoint/cloudPCs"
+
+    # Set the WebRequest headers
+    $headers = @{
+        'Content-Type' = 'application/json'
+        Accept = 'application/json'
+        Authorization = "Bearer $aadToken"
+    }
+
+    # Send the webrequest and get the results. 
+    $response = Invoke-WebRequest -Method Get -Uri $url -Headers $headers -ErrorAction Stop
+    #Extract the SW List from the results. 
+    $CloudPCList = ($response | ConvertFrom-Json).value | ConvertTo-Json
+
+    foreach ($item in ($CloudPCList | ConvertFrom-Json) ) {
+        $CPC = [PSCustomObject]@{
+            Hostname = $item.managedDeviceName
+            User = $item.userPrincipalName
+            License = $item.servicePlanType
+            LicenseType = $item.servicePlanName
+            Image = $item.imageDisplayName
+            State = $item.status
+            LastUpdated = $item.lastModifiedDateTime
+        }
+    $CPC | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
+    }
+    Write-Host "Function WindowsCloudPC finished." -ForegroundColor Green
+}
+
 function AutopilotEvents {
 
     $SheetName = "Windows Autopilot (FOR WPS)" 
@@ -478,6 +510,7 @@ if ($true -eq (Test-Path ($OutFile))){
 DefenderAlerts
 AzurePrinter
 AzureADDevices
+WindowsCloudPC
 AzureADLicenses
 AzureADUsers
 AzureADGroups
