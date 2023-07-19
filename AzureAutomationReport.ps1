@@ -1,9 +1,9 @@
 <#
     .SYNOPSIS 
-    Workplace Management Reporting
+    Modern Workplace Management Reporting
 
     .DESCRIPTION
-    Install:   .\AzureReport.ps1 
+    Install:   .\AzureAutomationReport.ps1 
 
     .ENVIRONMENT
     PowerShell 7.1
@@ -28,8 +28,6 @@ Param (
 
 #Settings
 $ErrorActionPreference = "SilentlyContinue"
-#$Customer = (Get-AutomationVariable -Name 'Customer')
-#$ReportRecipient = (Get-AutomationVariable -Name 'ReportRecipient')
 
 #Variable for last month
 $LastMonth = (Get-Date -Format "MM").ToString() -1
@@ -42,9 +40,6 @@ $Month = $LastMonthYear.ToString() + "-" + $LastMonth.ToString()
 $OutFile = "$PSSCRIPTROOT\$Month-$Customer-ModernWorkplaceReport.xlsx"
 
 #Azure login token
-#$tenantId = (Get-AutomationVariable -Name 'tenantId')
-#$appId = (Get-AutomationVariable -Name 'appId')
-#$appSecret = (Get-AutomationVariable -Name 'appSecret')
 $resourceAppIdUri = 'https://graph.microsoft.com'
 $oAuthUri = "https://login.microsoftonline.com/$TenantId/oauth2/token"
 $body = [Ordered] @{
@@ -191,7 +186,7 @@ function WindowsCloudPC {
 
 function AutopilotEvents {
 
-    $SheetName = "Windows Autopilot (FOR WPS)" 
+    $SheetName = "Windows Autopilot Logs" 
     $url = "https://graph.microsoft.com/beta/deviceManagement/autopilotEvents"
 
     # Set the WebRequest headers
@@ -320,7 +315,7 @@ function AzureADLicenses {
 
 function IntuneApplicationList {
 
-    $SheetName = "Software Warenkorb" 
+    $SheetName = "Software Inventory" 
     $url = "https://graph.microsoft.com/v1.0/deviceAppManagement/mobileApps"
 
     # Set the WebRequest headers
@@ -351,7 +346,7 @@ function IntuneApplicationList {
 
 function IntuneCreatedPackages {
 
-    $SheetName = "Software Paketierungen" 
+    $SheetName = "Software Packaging last month" 
     $url = "https://graph.microsoft.com/v1.0/deviceAppManagement/mobileApps"
 
     # Set the WebRequest headers
@@ -382,7 +377,7 @@ function IntuneCreatedPackages {
 
 function WindowsUpdateForBusinessDeployments {
 
-    $SheetName = "Windows Updates (FOR WPS)" 
+    $SheetName = "Windows Updates" 
     $url = "https://graph.microsoft.com/beta/admin/windows/updates/catalog/entries"
 
     # Set the WebRequest headers
@@ -409,7 +404,7 @@ function WindowsUpdateForBusinessDeployments {
 }
 
 function IntuneAuditLogs {
-    $SheetName = "Intune AuditLogs (FOR WPS)" 
+    $SheetName = "Intune AuditLogs" 
     $url = "https://graph.microsoft.com/beta/deviceManagement/auditEvents"
 
     # Set the WebRequest headers
@@ -469,13 +464,13 @@ $BodyJsonsend = @"
                           "subject": "Modern Workplace Reporting $Customer",
                           "body": {
                             "contentType": "HTML",
-                            "content": "Hallo,
+                            "content": "Hello,
                              <br><br>
-                             Anbei der Report des Kunden $Customer aus dem Monat $Month.
+                             attached a report for $Customer from $Month.
                              <br><br>
-                             Mit freundlichen Gr&uuml;&szlig;en
+                             Best regards
                              <br>
-                             OS Modern Workplace Services
+                             Modern Workplace Services
                             "
                           },
                           "toRecipients": [
@@ -518,10 +513,10 @@ function MSTeamsAlert {
 	$JSONBody = [PSCustomObject][Ordered]@{
     "@type" = "MessageCard"
     "@context" = "<http://schema.org/extensions>"
-    "summary" = "WPS Reporting"
+    "summary" = "Modern Workplace Reporting"
     "themeColor" = '0078D7'
-    "title" = "WPS Reporting"
-    "text" = "Der monatliche Report des Kunden $Customer wurde erstellt und versendet."
+    "title" = "Modern Workplace Reporting"
+    "text" = "Monthly report for $Customer created and send."
 	}
 
 	$TeamMessageBody = ConvertTo-Json $JSONBody
