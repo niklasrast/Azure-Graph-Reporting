@@ -59,6 +59,13 @@ $appSecret = 'AZUREADAPPSECRET-HERE'
 ```
 ![Alt text](https://github.com/niklasrast/Azure-Graph-Reporting/blob/main/img/azure-ad-app-registration-01.png "App registration details")
 
+## Sample Screenshots
+
+![Alt text](https://github.com/niklasrast/Azure-Graph-Reporting/blob/main/img/sample01.png "Sample Report Data")
+![Alt text](https://github.com/niklasrast/Azure-Graph-Reporting/blob/main/img/sample02.png "Sample Report Data")
+![Alt text](https://github.com/niklasrast/Azure-Graph-Reporting/blob/main/img/sample03.png "Sample Report Data")
+
+
 ### Azure AD App permissions:
 Create an Azure AD App registration and assign following rights:
 ![Alt text](https://github.com/niklasrast/Azure-Graph-Reporting/blob/main/img/azure-ad-app-permissions.png "App permissions details")
