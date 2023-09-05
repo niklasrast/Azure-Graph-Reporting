@@ -287,7 +287,7 @@ function AzureADGroups {
 function AzureADLicenses {
 
     $SheetName = "Azure AD Licenses" 
-    $url = "https://graph.microsoft.com/v1.0/subscribedSkus"
+    $url = "https://graph.microsoft.com/beta/directory/subscriptions"
 
     # Set the WebRequest headers
     $headers = @{
@@ -299,16 +299,18 @@ function AzureADLicenses {
     # Send the webrequest and get the results. 
     $response = Invoke-WebRequest -Method Get -Uri $url -Headers $headers -ErrorAction Stop
     #Extract the alerts from the results. 
-    $AADLic = ($response | ConvertFrom-Json).value | ConvertTo-Json
+    $Licenses = ($response | ConvertFrom-Json).value | ConvertTo-Json
 
-    foreach ($item in ($AADLic | ConvertFrom-Json) ) {
-        $AADLic = [PSCustomObject]@{
-            #LicenseName = $item.skuPartNumber
-            LicenseName = $($item.skuPartNumber -replace 'SPE_E5','Microsoft 365 E5').Replace('SPE_E3','Microsoft 365 E3').Replace('SPE_F1','Microsoft 365 F3').Replace('DESKLESSPACK','Office 365 F3').Replace('VISIOCLIENT','Microsoft Visio (Plan 2)').Replace('VISIOONLINE_PLAN1','Microsoft Visio (Plan 1)').Replace('PROJECTPROFESSIONAL','Microsoft Project (Plan 3)').Replace('FLOW_FREE','Microsoft Flow (Free)').Replace('PHONESYSTEM_VIRTUALUSER','Microsoft 365 Phone System Virtual User').Replace('MCOCAP','COMMON AREA PHONE').Replace('MEETING_ROOM','Microsoft Teams Rooms Standard').Replace('POWER_BI_STANDARD','Microsoft Power BI Standard').Replace('PBI_PREMIUM_PER_USER','Microsoft Power BI Premium').Replace('TEAMS_EXPLORATORY','Microsoft Teams Exploratory').Replace('MCOPSTN2','Microsoft Skype for Business').Replace('RIGHTSMANAGEMENT_ADHOC','Rights Management Adhoc').Replace('POWERAPPS_DEV','Microsoft Power Apps for Developer').Replace('CPC_B_2C_8RAM_128GB','Windows 365 Business 2 vCPU 8 GB 128 GB').Replace('CPC_E_2C_8GB_128GB','Windows 365 Enterprise 2 vCPU 8 GB 128 GB')
-            Total = $item.prepaidUnits.enabled
-            Assigned = $item.consumedUnits
+    foreach ($item in ($Licenses | ConvertFrom-Json) ) {
+        $License = [PSCustomObject]@{
+            Name = $item.skuPartNumber
+            State = $item.status
+            Trial = $item.isTrial
+            Licenses = $item.totalLicenses
+            StartDate = $item.createdDateTime
+            EndDate = $item.nextLifecycleDateTime
         }
-    $AADLic | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
+    $License | Export-Excel -Path $OutFile -MoveToEnd -WorksheetName $SheetName -Append -AutoSize
     }
     Write-Host "Function AADLicenses finished." -ForegroundColor Green
 }
